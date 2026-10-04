@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Celesticate Moments — Invitation builder</title>
+  <meta name="description" content="Design a premium interactive invitation with Celesticate Moments.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:wght@400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ═══ Header ═══ -->
+  <header class="app-header" role="banner">
+    <div class="brand">
+      <svg class="brand-mark" width="24" height="24" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" aria-hidden="true">
+        <path d="M13 3v20M13 13c-4-1-6-4-6-8 4 1 6 4 6 8ZM13 17c4-1 6-4 6-8-4 1-6 4-6 8Z"/>
+      </svg>
+      <span class="brand-name">Celesticate Moments</span>
+      <span class="brand-divider" aria-hidden="true"></span>
+      <span class="brand-label">Invitation builder</span>
+    </div>
+    <div class="header-actions">
+      <span class="status" role="status" aria-label="Document status: Draft">Draft</span>
+      <button class="btn btn-primary btn-sm" type="button" disabled title="Preview will be available in a later phase" aria-disabled="true">
+        Preview
+      </button>
+    </div>
+  </header>
+
+  <!-- ═══ Workspace ═══ -->
+  <main class="workspace" aria-label="Invitation builder workspace">
+
+    <!-- ── Editor Sidebar ── -->
+    <aside class="sidebar" aria-label="Invitation editor">
+
+      <div class="sidebar-intro">
+        <div class="sidebar-intro-head">
+          <h1 class="sidebar-title">Customize</h1>
+          <button class="btn-link" type="button" id="reset-btn">Reset to sample</button>
+        </div>
+        <p class="sidebar-desc">Changes appear in the preview as you type.</p>
+      </div>
+
+      <section class="card" aria-labelledby="g-details">
+        <div class="card-header">
+          <h2 class="card-title" id="g-details">Event details</h2>
+          <p class="card-note">Wording, date and place.</p>
+        </div>
+        <div class="card-body">
+          <div class="field">
+            <label class="label" for="f-event">Event type</label>
+            <select class="input input-select" id="f-event" data-field="eventType">
+              <option value="wedding">Wedding</option>
+              <option value="birthday">Birthday</option>
+              <option value="graduation">Graduation</option>
+              <option value="engagement">Engagement</option>
+              <option value="anniversary">Anniversary</option>
+              <option value="baby">Baby Shower</option>
+              <option value="general">General Event</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="label" id="label-heading" for="f-heading">Host or family names</label>
+            <input class="input" id="f-heading" data-field="heading" type="text" maxlength="60" placeholder="e.g. Together with their families" autocomplete="off">
+          </div>
+          <div class="field">
+            <label class="label" id="label-title" for="f-title">Main invitation heading</label>
+            <input class="input" id="f-title" data-field="title" type="text" maxlength="60" placeholder="Optional heading" autocomplete="off">
+          </div>
+          <div class="field">
+            <label class="label" id="label-names" for="f-names">Names of the couple</label>
+            <input class="input" id="f-names" data-field="names" type="text" maxlength="60" placeholder="e.g. Alex & Jamie" autocomplete="off">
+          </div>
+          <div class="field">
+            <label class="label" id="label-message" for="f-message">Introductory message</label>
+            <textarea class="input input-area" id="f-message" data-field="message" rows="3" maxlength="160" placeholder="A short welcome for your guests"></textarea>
+            <p class="char-count" id="count-message" aria-live="polite">0 / 160</p>
+          </div>
+          <div class="field">
+            <label class="label" id="label-note" for="f-note">Additional message</label>
+            <textarea class="input input-area" id="f-note" data-field="note" rows="2" maxlength="200" placeholder="Optional note for guests"></textarea>
+            <p class="char-count" id="count-note" aria-live="polite">0 / 200</p>
+          </div>
+          <div class="field">
+            <label class="label" for="f-date">Event date</label>
+            <input class="input" id="f-date" data-field="date" type="date" autocomplete="off">
+          </div>
+          <div class="field">
+            <label class="label" for="f-time">Start time</label>
+            <input class="input" id="f-time" data-field="time" type="time" autocomplete="off">
+          </div>
+          <div class="field">
+            <label class="label" for="f-venue">Venue name</label>
+            <input class="input" id="f-venue" data-field="venue" type="text" maxlength="80" placeholder="e.g. Garden Pavilion" autocomplete="off">
+          </div>
+          <div class="field">
+            <label class="label" for="f-place">Venue address</label>
+            <input class="input" id="f-place" data-field="location" type="text" maxlength="80" placeholder="e.g. Bandung, Indonesia" autocomplete="off">
+          </div>
+        </div>
+      </section>
+
+      <section class="card" aria-labelledby="g-appearance">
+        <div class="card-header">
+          <h2 class="card-title" id="g-appearance">Appearance</h2>
+          <p class="card-note">Style, colors and typography.</p>
+        </div>
+        <div class="card-body">
+          <fieldset class="field fieldset">
+            <legend class="label">Invitation style</legend>
+            <div class="template-options">
+              <label class="template-option">
+                <input type="radio" name="template" value="classic" data-field="template">
+                <span class="template-chip"><span class="template-thumb template-thumb-classic" aria-hidden="true"></span><span class="template-copy"><strong>Classic</strong><span>Elegant and timeless</span></span></span>
+              </label>
+              <label class="template-option">
+                <input type="radio" name="template" value="editorial" data-field="template">
+                <span class="template-chip"><span class="template-thumb template-thumb-editorial" aria-hidden="true"></span><span class="template-copy"><strong>Editorial</strong><span>Typography-led and sophisticated</span></span></span>
+              </label>
+              <label class="template-option">
+                <input type="radio" name="template" value="minimal" data-field="template">
+                <span class="template-chip"><span class="template-thumb template-thumb-minimal" aria-hidden="true"></span><span class="template-copy"><strong>Minimal</strong><span>Clean and understated</span></span></span>
+              </label>
+              <label class="template-option">
+                <input type="radio" name="template" value="photo" data-field="template">
+                <span class="template-chip"><span class="template-thumb template-thumb-photo" aria-hidden="true"></span><span class="template-copy"><strong>Photo Focus</strong><span>Let your photos take the lead</span></span></span>
+              </label>
+            </div>
+          </fieldset>
+          <fieldset class="field fieldset">
+            <legend class="label">Color palette</legend>
+            <div class="palette-options">
+              <label class="palette-option" data-palette="forest"><input type="radio" name="palette" value="forest" data-field="palette"><span class="palette-chip"><span class="palette-dots" aria-hidden="true"><i></i><i></i><i></i></span>Forest &amp; Ivory</span></label>
+              <label class="palette-option" data-palette="sage"><input type="radio" name="palette" value="sage" data-field="palette"><span class="palette-chip"><span class="palette-dots" aria-hidden="true"><i></i><i></i><i></i></span>Sage &amp; Cream</span></label>
+              <label class="palette-option" data-palette="midnight"><input type="radio" name="palette" value="midnight" data-field="palette"><span class="palette-chip"><span class="palette-dots" aria-hidden="true"><i></i><i></i><i></i></span>Midnight &amp; Champagne</span></label>
+            </div>
+          </fieldset>
+          <div class="field">
+            <label class="label" for="f-font">Heading font</label>
+            <select class="input input-select" id="f-font" data-field="headingFont">
+              <option value="cormorant">Cormorant Garamond</option>
+              <option value="playfair">Playfair Display</option>
+              <option value="dmsans">DM Sans</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" aria-labelledby="g-photos">
+        <div class="card-header">
+          <h2 class="card-title" id="g-photos">Photos</h2>
+          <p class="card-note">JPEG, PNG, or WebP. 5–10 recommended, 20 maximum, 8 MB each.</p>
+        </div>
+        <div class="card-body">
+          <fieldset class="field fieldset">
+            <legend class="label">Gallery style</legend>
+            <div class="style-options">
+              <label class="style-option">
+                <input type="radio" name="galleryStyle" value="cinematic" data-field="galleryLayout">
+                <span class="style-chip">
+                  <span class="style-preview style-preview-cine" aria-hidden="true"></span>
+                  <span class="style-copy"><strong>Cinematic</strong><span>Automatic photo rotation</span></span>
+                </span>
+              </label>
+              <label class="style-option">
+                <input type="radio" name="galleryStyle" value="slideshow" data-field="galleryLayout">
+                <span class="style-chip">
+                  <span class="style-preview style-preview-slide" aria-hidden="true"></span>
+                  <span class="style-copy"><strong>Slide</strong><span>Manual photo navigation</span></span>
+                </span>
+              </label>
+              <label class="style-option">
+                <input type="radio" name="galleryStyle" value="grid" data-field="galleryLayout">
+                <span class="style-chip">
+                  <span class="style-preview style-preview-grid" aria-hidden="true"></span>
+                  <span class="style-copy"><strong>Photo Grid</strong><span>Browse multiple photos</span></span>
+                </span>
+              </label>
+            </div>
+            <p class="gallery-style-note" id="gallery-style-note">Choose a style now. It appears in the invitation after you add photos.</p>
+          </fieldset>
+          <fieldset class="field fieldset" id="grid-layout-field" hidden>
+            <legend class="label">Grid layout</legend>
+            <div class="style-options style-options-row">
+              <label class="style-option">
+                <input type="radio" name="galleryOrientation" value="horizontal" data-field="galleryOrientation">
+                <span class="style-chip"><span class="style-copy"><strong>Horizontal</strong><span>Side by side, scroll across</span></span></span>
+              </label>
+              <label class="style-option">
+                <input type="radio" name="galleryOrientation" value="vertical" data-field="galleryOrientation">
+                <span class="style-chip"><span class="style-copy"><strong>Vertical</strong><span>Stacked, page scrolls</span></span></span>
+              </label>
+            </div>
+          </fieldset>
+          <div class="photo-toolbar">
+            <input class="visually-hidden" id="photo-input" type="file" accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp" multiple aria-describedby="photo-count photo-feedback">
+            <button class="btn btn-secondary btn-sm" type="button" id="add-photos-btn">Add photos</button>
+            <p class="photo-count" id="photo-count">No photos yet</p>
+          </div>
+          <p class="photo-empty" id="photo-empty">No photos selected yet. Add images to build the gallery. They stay on this device only.</p>
+          <ul class="photo-list" id="photo-list" aria-label="Selected photos"></ul>
+          <div class="photo-feedback" id="photo-feedback" role="status" aria-live="polite" hidden></div>
+        </div>
+      </section>
+
+      <section class="card" aria-labelledby="g-sections">
+        <div class="card-header">
+          <h2 class="card-title" id="g-sections">Sections</h2>
+          <p class="card-note">Show, hide and reorder what guests see.</p>
+        </div>
+        <div class="card-body">
+          <ul class="section-list" id="section-list" aria-label="Invitation sections"></ul>
+        </div>
+      </section>
+
+    </aside>
+
+    <!-- ── Preview Canvas ── -->
+    <section class="canvas" aria-label="Live invitation preview">
+
+      <div class="canvas-header">
+        <h2 class="canvas-title">Live Preview</h2>
+        <p class="canvas-desc">This reflects your current invitation settings.</p>
+      </div>
+
+      <div class="canvas-toolbar" role="toolbar" aria-label="Preview controls">
+        <div class="preview-toolbar-main">
+          <div class="segmented" role="group" aria-label="Preview size">
+            <button type="button" class="seg-btn" data-mode="desktop" aria-pressed="false">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="1" y="3" width="14" height="10" rx="1.5"/><path d="M6 13v1.5M10 13v1.5M4.5 14.5h7"/></svg>
+              Desktop
+            </button>
+            <button type="button" class="seg-btn" data-mode="mobile" aria-pressed="true">
+              <svg width="12" height="14" viewBox="0 0 12 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="1" y="1" width="10" height="14" rx="2"/><circle cx="6" cy="13" r=".7" fill="currentColor" stroke="none"/></svg>
+              Mobile
+            </button>
+          </div>
+          <p class="preview-mode-label" id="preview-mode-label">Mobile preview</p>
+          <div class="check-pop" id="check-pop">
+            <button class="check-toggle" id="check-toggle" type="button" aria-expanded="false" aria-controls="preview-checklist-panel" aria-label="Preview checklist, 0 of 4 complete">
+              <svg class="check-icon" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 8.2 7 10l4-4.2"/></svg>
+              <span>Preview Checklist</span>
+              <span class="check-count" id="check-count">0/4</span>
+              <span class="check-chevron" aria-hidden="true">
+                <svg width="10" height="10" viewBox="0 0 12 8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1.5 6 6.5 11 1.5"/></svg>
+              </span>
+            </button>
+            <div class="check-panel" id="preview-checklist-panel" hidden>
+              <p class="check-panel-title">Preview checklist</p>
+              <ul class="preview-checklist" id="preview-checklist"></ul>
+              <p class="check-summary" id="check-summary">0 of 4 complete</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="stage" role="region" aria-label="Invitation card preview area">
+        <div class="device" id="device" data-mode="mobile">
+        <article class="invite" id="invite" data-palette="forest" data-font="cormorant" data-template="classic" aria-label="Sample wedding invitation">
+
+          <div class="invite-section invite-welcome" data-section-el="welcome">
+            <p class="invite-kicker" data-el="heading">Together with their families</p>
+            <p class="invite-title" data-el="title" hidden></p>
+
+            <svg class="invite-sprig" data-el="sprig" width="60" height="26" viewBox="0 0 64 28" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" aria-hidden="true">
+              <path d="M4 14h56M32 14c-3-5-3-9 0-12 3 3 3 7 0 12ZM32 14c-3 5-3 9 0 12 3-3 3-7 0-12ZM20 14c-4-3-6-6-6-9 4 1 6 4 6 9ZM44 14c4-3 6-6 6-9-4 1-6 4-6 9ZM20 14c-4 3-6 6-6 9 4-1 6-4 6-9ZM44 14c4 3 6 6 6 9-4-1-6-4-6-9Z"/>
+            </svg>
+
+            <div class="invite-photo">
+              <div class="photo-inner" role="img" aria-label="Sample couple photo placeholder">
+                <svg viewBox="0 0 200 250" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                  <circle class="ph-sun" cx="100" cy="85" r="34"/>
+                  <path class="ph-hill" d="M0 175c40-30 80-30 120-10s60 10 80-5v90H0Z"/>
+                  <path class="ph-ground" d="M0 205c50-25 100-20 200 0v45H0Z"/>
+                </svg>
+                <img class="hero-photo" id="hero-photo" alt="" hidden>
+              </div>
+            </div>
+
+            <p class="invite-intro" data-el="message">We joyfully invite you to celebrate our wedding.</p>
+            <p class="invite-note" data-el="note" hidden></p>
+
+            <h2 class="invite-names" data-el="names">Alex <span class="amp">&amp;</span> Jamie</h2>
+          </div>
+
+          <div class="invite-section invite-details" data-section-el="details">
+            <hr class="invite-rule" aria-hidden="true">
+            <p class="invite-date" data-el="date">12 June 2027</p>
+            <p class="invite-time" data-el="time" hidden></p>
+          </div>
+
+          <div class="invite-section invite-venue" data-section-el="venue">
+            <p class="invite-venue-name" data-el="venue" hidden></p>
+            <p class="invite-place" data-el="location">Bandung, Indonesia</p>
+          </div>
+
+          <!-- Coming-soon sections: kept for later phases, never shown while status is "coming-soon". -->
+          <div class="invite-section invite-placeholder" data-section-el="countdown" hidden>
+            <strong>Countdown</strong>
+            <span>Coming soon.</span>
+          </div>
+          <div class="invite-section invite-gallery" data-section-el="gallery" hidden>
+            <p class="invite-kicker">Gallery</p>
+            <div class="gallery-view" data-el="gallery" data-mode="cinematic"></div>
+          </div>
+          <div class="invite-section invite-cta-wrap" data-section-el="rsvp" hidden>
+            <span class="invite-cta" aria-hidden="true">Kindly reply</span>
+            <p class="invite-ph-note">RSVP is coming soon.</p>
+          </div>
+
+        </article>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <dialog class="dialog" id="reset-dialog" aria-labelledby="reset-title">
+    <form method="dialog">
+      <h2 id="reset-title">Reset to sample?</h2>
+      <p>This replaces everything you've entered with the sample invitation and default appearance. It can't be undone.</p>
+      <div class="dialog-actions">
+        <button class="btn btn-secondary btn-sm" type="submit" value="cancel" autofocus>Keep my edits</button>
+        <button class="btn btn-primary btn-sm" type="submit" value="confirm">Reset invitation</button>
+      </div>
+    </form>
+  </dialog>
+  <dialog class="dialog" id="event-dialog" aria-labelledby="event-title">
+    <form method="dialog">
+      <h2 id="event-title">Apply event preset?</h2>
+      <p id="event-dialog-copy">This replaces the suggested wording with the new event type. Date, place, photos, and appearance stay as they are.</p>
+      <div class="dialog-actions">
+        <button class="btn btn-secondary btn-sm" type="submit" value="cancel" autofocus>Keep my text</button>
+        <button class="btn btn-primary btn-sm" type="submit" value="confirm">Apply preset</button>
+      </div>
+    </form>
+  </dialog>
+  <dialog class="dialog gallery-lightbox" id="gallery-lightbox" aria-labelledby="lightbox-title">
+    <div class="lightbox-frame">
+      <img id="lightbox-img" alt="">
+    </div>
+    <p class="lightbox-pos" id="lightbox-title"></p>
+    <div class="lightbox-actions">
+      <button class="btn btn-secondary btn-sm" type="button" data-lightbox-nav="-1">Previous</button>
+      <button class="btn btn-secondary btn-sm" type="button" data-lightbox-nav="1">Next</button>
+      <button class="btn btn-primary btn-sm" type="button" data-lightbox-close>Close</button>
+    </div>
+  </dialog>
+  <p class="visually-hidden" id="live-status" role="status" aria-live="polite"></p>
+
+  <script src="script.js" defer></script>
+</body>
+</html>
