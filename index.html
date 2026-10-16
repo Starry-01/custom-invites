@@ -9,10 +9,11 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:wght@400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="studio.css">
+  <link rel="stylesheet" href="guided.css">
 </head>
-<body>
+<body data-guided="start">
 
-  <!-- ═══ Header ═══ -->
   <header class="app-header" role="banner">
     <div class="brand">
       <svg class="brand-mark" width="24" height="24" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" aria-hidden="true">
@@ -24,16 +25,47 @@
     </div>
     <div class="header-actions">
       <span class="status" role="status" aria-label="Document status: Draft">Draft</span>
-      <button class="btn btn-primary btn-sm" type="button" disabled title="Preview will be available in a later phase" aria-disabled="true">
+      <div class="account-bar" id="account-bar">
+        <span class="account-email" id="account-email" hidden></span>
+        <button class="btn-link" type="button" id="account-btn">Sign in</button>
+        <button class="btn-link" type="button" id="signout-btn" hidden>Sign out</button>
+        <button class="btn btn-secondary btn-sm" type="button" id="open-saved-btn" hidden title="Open your most recently saved invitation">Open last saved</button>
+        <button class="btn btn-secondary btn-sm" type="button" id="save-btn" title="Save this invitation to your account (an account is needed)">Save</button>
+      </div>
+      <button class="btn btn-primary btn-sm" type="button" id="guest-preview-btn" title="Open a full-screen personal preview of your design">
         Preview
       </button>
     </div>
+    <p class="account-note" id="account-note" role="status" aria-live="polite"></p>
   </header>
 
-  <!-- ═══ Workspace ═══ -->
+  <div class="guest-bar" id="guest-bar" hidden>
+    <p class="guest-bar-label">
+      <span class="guest-bar-own"><strong>Personal preview.</strong> A draft for trying out your design. It is not published, cannot be sent to guests yet, and is not an order.</span>
+      <span class="guest-bar-shared"><strong>Draft preview.</strong> This link opens a sample design. It is not a saved or published invitation, and edits are not stored.</span>
+      <span class="guest-bar-dl-note">Download saves a picture for personal use. It is not a print-ready file.</span>
+    </p>
+    <div class="guest-bar-actions">
+      <button class="btn btn-primary btn-sm" type="button" id="guest-download"><span class="dl-label">Download preview</span></button>
+      <button class="btn btn-secondary btn-sm" type="button" id="guest-exit">Back to editor</button>
+    </div>
+    <p class="download-status" data-download-status role="status" aria-live="polite"></p>
+  </div>
+
+  <section class="guided-start" id="guided-start" aria-labelledby="gs-title" hidden>
+    <div class="gs-inner">
+      <h1 class="gs-title" id="gs-title">Create your invitation</h1>
+      <p class="gs-lead">Choose the occasion, then answer a few short questions. You can see your invitation take shape as you go. No account needed.</p>
+      <div class="gs-types" id="gs-types" role="radiogroup" aria-label="Invitation type"></div>
+      <div class="gs-actions">
+        <button class="btn btn-primary" type="button" id="gs-begin">Start creating</button>
+        <button class="btn-link" type="button" id="gs-full">Open the full editor instead</button>
+      </div>
+    </div>
+  </section>
+
   <main class="workspace" aria-label="Invitation builder workspace">
 
-    <!-- ── Editor Sidebar ── -->
     <aside class="sidebar" aria-label="Invitation editor">
 
       <div class="sidebar-intro">
@@ -44,10 +76,21 @@
         <p class="sidebar-desc">Changes appear in the preview as you type.</p>
       </div>
 
+      <div class="guided-bar" id="guided-bar" hidden>
+        <div class="guided-bar-top">
+          <p class="guided-count" id="guided-count"></p>
+          <button class="btn-link" type="button" id="guided-all">Show all settings</button>
+        </div>
+        <div class="guided-progress" aria-hidden="true"><span id="guided-fill"></span></div>
+        <ol class="guided-steps" id="guided-steps" aria-label="Steps"></ol>
+        <h2 class="guided-title" id="guided-title" tabindex="-1"></h2>
+        <p class="guided-hint" id="guided-hint"></p>
+      </div>
+
       <section class="card" aria-labelledby="g-details">
         <div class="card-header">
           <h2 class="card-title" id="g-details">Event details</h2>
-          <p class="card-note">Wording, date and place.</p>
+          <p class="card-note">Wording, date and place. Fields follow the event type.</p>
         </div>
         <div class="card-body">
           <div class="field">
@@ -58,15 +101,15 @@
               <option value="graduation">Graduation</option>
               <option value="engagement">Engagement</option>
               <option value="anniversary">Anniversary</option>
-              <option value="baby">Baby Shower</option>
               <option value="general">General Event</option>
             </select>
+            <p class="field-hint" id="event-hint">Suggested style: Classic. A style you choose yourself is kept.</p>
           </div>
           <div class="field">
             <label class="label" id="label-heading" for="f-heading">Host or family names</label>
             <input class="input" id="f-heading" data-field="heading" type="text" maxlength="60" placeholder="e.g. Together with their families" autocomplete="off">
           </div>
-          <div class="field">
+          <div class="field" data-events="wedding birthday graduation engagement anniversary general">
             <label class="label" id="label-title" for="f-title">Main invitation heading</label>
             <input class="input" id="f-title" data-field="title" type="text" maxlength="60" placeholder="Optional heading" autocomplete="off">
           </div>
@@ -74,15 +117,40 @@
             <label class="label" id="label-names" for="f-names">Names of the couple</label>
             <input class="input" id="f-names" data-field="names" type="text" maxlength="60" placeholder="e.g. Alex & Jamie" autocomplete="off">
           </div>
+          <div class="field" data-events="birthday anniversary">
+            <label class="label" id="label-milestone" for="f-milestone">Age or milestone</label>
+            <input class="input" id="f-milestone" data-field="milestone" type="text" maxlength="40" placeholder="e.g. Turning 30" autocomplete="off">
+          </div>
+          <div class="field" data-events="graduation">
+            <label class="label" id="label-school" for="f-school">School or institution</label>
+            <input class="input" id="f-school" data-field="school" type="text" maxlength="80" placeholder="e.g. Riverside University" autocomplete="off">
+          </div>
           <div class="field">
             <label class="label" id="label-message" for="f-message">Introductory message</label>
             <textarea class="input input-area" id="f-message" data-field="message" rows="3" maxlength="160" placeholder="A short welcome for your guests"></textarea>
             <p class="char-count" id="count-message" aria-live="polite">0 / 160</p>
           </div>
-          <div class="field">
+          <div class="field" data-events="engagement">
+            <label class="label" id="label-celebration" for="f-celebration">Engagement celebration</label>
+            <textarea class="input input-area" id="f-celebration" data-field="celebration" rows="2" maxlength="160" placeholder="How you would like to celebrate"></textarea>
+          </div>
+          <div class="field" data-events="wedding birthday graduation engagement anniversary general">
+            <label class="label" id="label-story" for="f-story">Love story</label>
+            <textarea class="input input-area" id="f-story" data-field="story" rows="3" maxlength="280" placeholder="A short story for your guests"></textarea>
+            <p class="char-count" id="count-story" aria-live="polite">0 / 280</p>
+          </div>
+          <div class="field" data-events="wedding birthday engagement anniversary general">
             <label class="label" id="label-note" for="f-note">Additional message</label>
             <textarea class="input input-area" id="f-note" data-field="note" rows="2" maxlength="200" placeholder="Optional note for guests"></textarea>
             <p class="char-count" id="count-note" aria-live="polite">0 / 200</p>
+          </div>
+          <div class="field" data-events="wedding">
+            <label class="label" for="f-ceremony">Ceremony information</label>
+            <input class="input" id="f-ceremony" data-field="ceremony" type="text" maxlength="80" placeholder="e.g. Ceremony at 2:00 pm" autocomplete="off">
+          </div>
+          <div class="field" data-events="wedding">
+            <label class="label" for="f-reception">Reception information</label>
+            <input class="input" id="f-reception" data-field="reception" type="text" maxlength="80" placeholder="e.g. Reception to follow" autocomplete="off">
           </div>
           <div class="field">
             <label class="label" for="f-date">Event date</label>
@@ -93,12 +161,22 @@
             <input class="input" id="f-time" data-field="time" type="time" autocomplete="off">
           </div>
           <div class="field">
-            <label class="label" for="f-venue">Venue name</label>
+            <label class="label" id="label-venue" for="f-venue">Venue name</label>
             <input class="input" id="f-venue" data-field="venue" type="text" maxlength="80" placeholder="e.g. Garden Pavilion" autocomplete="off">
           </div>
           <div class="field">
-            <label class="label" for="f-place">Venue address</label>
+            <label class="label" for="f-place">Address</label>
             <input class="input" id="f-place" data-field="location" type="text" maxlength="80" placeholder="e.g. Bandung, Indonesia" autocomplete="off">
+          </div>
+          <div class="field">
+            <label class="label" for="f-location-note">Location description</label>
+            <textarea class="input input-area" id="f-location-note" data-field="locationNote" rows="2" maxlength="180" placeholder="e.g. Enter through the south gate"></textarea>
+          </div>
+          <div class="field">
+            <label class="label" for="f-map">Maps link</label>
+            <input class="input" id="f-map" data-field="mapUrl" type="url" maxlength="400" placeholder="https://" autocomplete="off" aria-describedby="map-hint map-feedback">
+            <p class="field-hint" id="map-hint">Paste a Google Maps or other map link. Guests see a button, not the address.</p>
+            <p class="photo-feedback" id="map-feedback" role="status"></p>
           </div>
         </div>
       </section>
@@ -106,7 +184,7 @@
       <section class="card" aria-labelledby="g-appearance">
         <div class="card-header">
           <h2 class="card-title" id="g-appearance">Appearance</h2>
-          <p class="card-note">Style, colors and typography.</p>
+          <p class="card-note">Style, colors and opening animation.</p>
         </div>
         <div class="card-body">
           <fieldset class="field fieldset">
@@ -136,16 +214,123 @@
               <label class="palette-option" data-palette="forest"><input type="radio" name="palette" value="forest" data-field="palette"><span class="palette-chip"><span class="palette-dots" aria-hidden="true"><i></i><i></i><i></i></span>Forest &amp; Ivory</span></label>
               <label class="palette-option" data-palette="sage"><input type="radio" name="palette" value="sage" data-field="palette"><span class="palette-chip"><span class="palette-dots" aria-hidden="true"><i></i><i></i><i></i></span>Sage &amp; Cream</span></label>
               <label class="palette-option" data-palette="midnight"><input type="radio" name="palette" value="midnight" data-field="palette"><span class="palette-chip"><span class="palette-dots" aria-hidden="true"><i></i><i></i><i></i></span>Midnight &amp; Champagne</span></label>
+              <label class="palette-option" data-palette="custom" id="palette-custom"><input type="radio" name="palette" value="custom" data-field="palette"><span class="palette-chip"><span class="palette-dots" aria-hidden="true"><i></i><i></i><i></i></span>Custom</span></label>
+            </div>
+            <div class="custom-palette" id="custom-palette">
+              <p class="field-hint">Custom colors stay saved if you try a preset. Editing a color selects Custom.</p>
+              <div class="color-roles">
+                <label class="color-role" for="c-background">
+                  <input class="color-input" id="c-background" type="color" data-color="background" value="#F5F0E8" aria-label="Background color">
+                  <span class="color-copy"><span class="color-role-name">Background</span><span class="color-value" data-color-value="background">#F5F0E8</span></span>
+                </label>
+                <label class="color-role" for="c-primaryText">
+                  <input class="color-input" id="c-primaryText" type="color" data-color="primaryText" value="#292723" aria-label="Primary text color">
+                  <span class="color-copy"><span class="color-role-name">Primary text</span><span class="color-value" data-color-value="primaryText">#292723</span></span>
+                </label>
+                <label class="color-role" for="c-secondaryText">
+                  <input class="color-input" id="c-secondaryText" type="color" data-color="secondaryText" value="#68665E" aria-label="Secondary text color">
+                  <span class="color-copy"><span class="color-role-name">Secondary text</span><span class="color-value" data-color-value="secondaryText">#68665E</span></span>
+                </label>
+                <label class="color-role" for="c-accent">
+                  <input class="color-input" id="c-accent" type="color" data-color="accent" value="#B49A70" aria-label="Accent color">
+                  <span class="color-copy"><span class="color-role-name">Accent</span><span class="color-value" data-color-value="accent">#B49A70</span></span>
+                </label>
+                <label class="color-role" for="c-border">
+                  <input class="color-input" id="c-border" type="color" data-color="border" value="#DED7CA" aria-label="Border color">
+                  <span class="color-copy"><span class="color-role-name">Border</span><span class="color-value" data-color-value="border">#DED7CA</span></span>
+                </label>
+              </div>
+              <p class="contrast-note" id="contrast-note" role="status" hidden></p>
             </div>
           </fieldset>
-          <div class="field">
-            <label class="label" for="f-font">Heading font</label>
-            <select class="input input-select" id="f-font" data-field="headingFont">
-              <option value="cormorant">Cormorant Garamond</option>
-              <option value="playfair">Playfair Display</option>
-              <option value="dmsans">DM Sans</option>
-            </select>
+          <fieldset class="field fieldset" id="f-opening" tabindex="-1">
+            <legend class="label">Opening animation</legend>
+            <div class="opening-options">
+              <label class="opening-option">
+                <input type="radio" name="openingAnimation" value="none" data-field="openingAnimation">
+                <span class="opening-chip"><strong>None</strong><span>Open instantly</span></span>
+              </label>
+              <label class="opening-option">
+                <input type="radio" name="openingAnimation" value="fade" data-field="openingAnimation">
+                <span class="opening-chip"><strong>Fade In</strong><span>A soft, gradual reveal</span></span>
+              </label>
+              <label class="opening-option">
+                <input type="radio" name="openingAnimation" value="elegant-reveal" data-field="openingAnimation">
+                <span class="opening-chip"><strong>Elegant Reveal</strong><span>Content gently reveals from the center</span></span>
+              </label>
+              <label class="opening-option">
+                <input type="radio" name="openingAnimation" value="curtain" data-field="openingAnimation">
+                <span class="opening-chip"><strong>Curtain</strong><span>A refined two-panel opening</span></span>
+              </label>
+              <label class="opening-option">
+                <input type="radio" name="openingAnimation" value="zoom" data-field="openingAnimation">
+                <span class="opening-chip"><strong>Zoom In</strong><span>A subtle cinematic entrance</span></span>
+              </label>
+              <label class="opening-option">
+                <input type="radio" name="openingAnimation" value="slide-up" data-field="openingAnimation">
+                <span class="opening-chip"><strong>Slide Up</strong><span>The invitation rises into view</span></span>
+              </label>
+            </div>
+            <button class="btn btn-secondary btn-sm" type="button" id="preview-opening" disabled>Preview animation</button>
+          </fieldset>
+        </div>
+      </section>
+
+      <section class="card" aria-labelledby="g-music">
+        <div class="card-header">
+          <h2 class="card-title" id="g-music">Music</h2>
+          <p class="card-note">Optional. The invitation works without a track.</p>
+        </div>
+        <div class="card-body">
+          <label class="music-toggle" for="music-enabled">
+            <input type="checkbox" id="music-enabled">
+            <span>Add background music</span>
+          </label>
+          <div id="music-panel" hidden>
+            <p class="label">Music track</p>
+            <p class="music-empty" id="music-empty">No music selected. The file stays on this device only.</p>
+            <input class="visually-hidden" id="music-input" type="file" accept="audio/mpeg,audio/wav,audio/ogg,audio/mp4,audio/x-m4a,.mp3,.wav,.ogg,.m4a" aria-describedby="music-feedback">
+            <button class="btn btn-secondary btn-sm" type="button" id="music-upload">Upload audio</button>
+            <div class="music-chosen" id="music-chosen" hidden>
+              <p class="photo-name" id="music-name"></p>
+              <div class="photo-actions">
+                <button class="move-btn" type="button" id="music-preview">Play</button>
+                <button class="move-btn" type="button" id="music-change">Change</button>
+                <button class="move-btn" type="button" id="music-remove">Remove</button>
+              </div>
+            </div>
+            <p class="photo-feedback" id="music-feedback" role="status"></p>
+            <label class="music-toggle" for="music-autoplay">
+              <input type="checkbox" id="music-autoplay">
+              <span>Start automatically when invitation opens</span>
+            </label>
+            <p class="card-note">Some browsers may require the guest to tap play.</p>
+            <div class="field">
+              <label class="label" for="music-volume">Volume</label>
+              <input class="music-volume" id="music-volume" type="range" min="0" max="1" step="0.05" value="0.5" aria-valuemin="0" aria-valuemax="1" aria-valuenow="0.5">
+            </div>
           </div>
+        </div>
+      </section>
+
+      <section class="card" aria-labelledby="g-ambient">
+        <div class="card-header">
+          <h2 class="card-title" id="g-ambient">Ambient effects</h2>
+          <p class="card-note">Optional atmosphere. The invitation works without an effect.</p>
+        </div>
+        <div class="card-body">
+          <fieldset class="field fieldset" id="f-ambient">
+            <legend class="label">Effect</legend>
+            <div class="opening-options">
+              <label class="opening-option"><input type="radio" name="ambientEffect" value="none" data-field="ambientEffect"><span class="opening-chip"><strong>None</strong><span>No ambient effect</span></span></label>
+              <label class="opening-option"><input type="radio" name="ambientEffect" value="dust" data-field="ambientEffect"><span class="opening-chip"><strong>Golden Dust</strong><span>Fine gold specks drifting</span></span></label>
+              <label class="opening-option"><input type="radio" name="ambientEffect" value="petals" data-field="ambientEffect"><span class="opening-chip"><strong>Falling Petals</strong><span>Softly falling petals</span></span></label>
+              <label class="opening-option"><input type="radio" name="ambientEffect" value="leaves" data-field="ambientEffect"><span class="opening-chip"><strong>Floating Leaves</strong><span>A leaf drifting side to side</span></span></label>
+              <label class="opening-option"><input type="radio" name="ambientEffect" value="mist" data-field="ambientEffect"><span class="opening-chip"><strong>Mist / Haze</strong><span>A soft veil drifting across</span></span></label>
+              <label class="opening-option"><input type="radio" name="ambientEffect" value="stars" data-field="ambientEffect"><span class="opening-chip"><strong>Twinkling Stars</strong><span>One small sparkle star</span></span></label>
+            </div>
+            <p class="field-hint" id="ambient-note">No effect is playing in the preview.</p>
+          </fieldset>
         </div>
       </section>
 
@@ -155,6 +340,27 @@
           <p class="card-note">JPEG, PNG, or WebP. 5–10 recommended, 20 maximum, 8 MB each.</p>
         </div>
         <div class="card-body">
+          <div class="cover-block" id="cover-block">
+            <p class="label" id="cover-heading">Cover photo</p>
+            <p class="cover-note">The header photo. It is separate from your gallery and is never added to it.</p>
+            <div class="cover-empty" id="cover-empty">
+              <p>No cover photo yet. The header keeps its default artwork until you add one.</p>
+              <button class="btn btn-secondary btn-sm" type="button" id="cover-select">Upload cover photo</button>
+            </div>
+            <div class="cover-chosen" id="cover-chosen" hidden>
+              <img class="cover-thumb" id="cover-thumb" alt="">
+              <div class="cover-meta">
+                <p class="photo-name" id="cover-name">Cover photo</p>
+                <p class="photo-pos">Current cover</p>
+                <div class="photo-actions">
+                  <button class="move-btn" type="button" id="cover-change">Replace</button>
+                  <button class="move-btn" type="button" id="cover-remove">Remove</button>
+                </div>
+              </div>
+            </div>
+            <p class="photo-feedback" id="cover-feedback" role="status" hidden></p>
+            <input class="visually-hidden" id="cover-input" type="file" accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp" aria-labelledby="cover-heading">
+          </div>
           <fieldset class="field fieldset">
             <legend class="label">Gallery style</legend>
             <div class="style-options">
@@ -207,18 +413,126 @@
       </section>
 
       <section class="card" aria-labelledby="g-sections">
-        <div class="card-header">
-          <h2 class="card-title" id="g-sections">Sections</h2>
-          <p class="card-note">Show, hide and reorder what guests see.</p>
+        <div class="card-header card-header-row">
+          <div>
+            <h2 class="card-title" id="g-sections">Layout</h2>
+            <p class="card-note">Arrange the sections of your invitation and choose what guests see.</p>
+          </div>
+          <button class="btn-link" type="button" id="layout-reset" disabled>Reset layout</button>
         </div>
         <div class="card-body">
-          <ul class="section-list" id="section-list" aria-label="Invitation sections"></ul>
+          <p class="section-hint layout-note" id="layout-note" role="status" hidden></p>
+          <ul class="section-list" id="section-list" aria-label="Invitation sections, in the order guests see them"></ul>
         </div>
       </section>
 
+      <section class="card" id="typography-card" aria-labelledby="g-typography">
+        <div class="card-header card-header-row">
+          <div>
+            <h2 class="card-title" id="g-typography">Typography</h2>
+            <p class="card-note">Choose the type style that sets the tone for your invitation.</p>
+          </div>
+          <button class="btn-link" type="button" id="type-reset" disabled>Reset typography</button>
+        </div>
+        <div class="card-body">
+          <fieldset class="field fieldset">
+            <legend class="label">Type style</legend>
+            <div class="type-presets" id="type-presets"></div>
+            <p class="gallery-style-note" id="type-state" role="status"></p>
+          </fieldset>
+          <fieldset class="field fieldset">
+            <legend class="label">Text size</legend>
+            <div class="style-options style-options-3">
+              <label class="style-option">
+                <input type="radio" name="typeScale" value="compact" data-typo="scale">
+                <span class="style-chip type-seg"><strong>Compact</strong></span>
+              </label>
+              <label class="style-option">
+                <input type="radio" name="typeScale" value="balanced" data-typo="scale">
+                <span class="style-chip type-seg"><strong>Balanced</strong></span>
+              </label>
+              <label class="style-option">
+                <input type="radio" name="typeScale" value="spacious" data-typo="scale">
+                <span class="style-chip type-seg"><strong>Spacious</strong></span>
+              </label>
+            </div>
+          </fieldset>
+          <fieldset class="field fieldset">
+            <legend class="label">Alignment</legend>
+            <div class="style-options style-options-3">
+              <label class="style-option">
+                <input type="radio" name="typeAlign" value="left" data-typo="alignment">
+                <span class="style-chip type-seg"><strong>Left</strong></span>
+              </label>
+              <label class="style-option">
+                <input type="radio" name="typeAlign" value="center" data-typo="alignment">
+                <span class="style-chip type-seg"><strong>Center</strong></span>
+              </label>
+              <label class="style-option">
+                <input type="radio" name="typeAlign" value="right" data-typo="alignment">
+                <span class="style-chip type-seg"><strong>Right</strong></span>
+              </label>
+            </div>
+          </fieldset>
+          <fieldset class="field fieldset">
+            <legend class="label">Letter spacing</legend>
+            <div class="style-options style-options-3">
+              <label class="style-option">
+                <input type="radio" name="typeSpacing" value="tight" data-typo="spacing">
+                <span class="style-chip type-seg"><strong>Tight</strong></span>
+              </label>
+              <label class="style-option">
+                <input type="radio" name="typeSpacing" value="normal" data-typo="spacing">
+                <span class="style-chip type-seg"><strong>Normal</strong></span>
+              </label>
+              <label class="style-option">
+                <input type="radio" name="typeSpacing" value="airy" data-typo="spacing">
+                <span class="style-chip type-seg"><strong>Airy</strong></span>
+              </label>
+            </div>
+          </fieldset>
+        </div>
+      </section>
+
+      <section class="card" id="share-card" aria-labelledby="g-share">
+        <div class="card-header">
+          <h2 class="card-title" id="g-share">Share</h2>
+          <p class="card-note">Preview tools. Public links and sharing arrive with publishing.</p>
+        </div>
+        <div class="card-body">
+          <div class="field">
+            <label class="label" for="share-url">Invitation link</label>
+            <div class="share-link-row">
+              <input class="input" id="share-url" type="text" readonly spellcheck="false" autocomplete="off" aria-describedby="share-note">
+              <button class="btn btn-secondary btn-sm" type="button" id="share-copy"><span class="share-copy-label">Copy Link</span></button>
+            </div>
+            <p class="field-hint" id="share-note"></p>
+          </div>
+          <figure class="share-qr-wrap">
+            <div class="share-qr" id="share-qr"></div>
+            <figcaption class="share-qr-caption">Scan to open invitation</figcaption>
+          </figure>
+          <div class="share-actions">
+            <button class="btn btn-secondary btn-sm" type="button" id="share-download" disabled>Download QR Code</button>
+            <button class="btn btn-primary btn-sm" type="button" id="share-native">Share Invitation</button>
+          </div>
+          <div class="share-image">
+            <button class="btn btn-secondary btn-sm" type="button" id="share-download-image"><span class="dl-label">Download preview image</span></button>
+            <p class="field-hint">A picture of your design for personal use. It is not a print-ready file or a published invitation.</p>
+            <p class="download-status" data-download-status role="status" aria-live="polite"></p>
+          </div>
+          <button class="btn-link share-preview-link" type="button" id="share-open-preview">Open full preview</button>
+          <p class="field-hint share-feedback" id="share-feedback" role="status" aria-live="polite"></p>
+        </div>
+      </section>
+
+      <div class="guided-nav" id="guided-nav" hidden>
+        <button class="btn btn-secondary" type="button" id="guided-back">Back</button>
+        <button class="btn btn-primary" type="button" id="guided-next">Next</button>
+      </div>
+
     </aside>
 
-    <!-- ── Preview Canvas ── -->
     <section class="canvas" aria-label="Live invitation preview">
 
       <div class="canvas-header">
@@ -259,7 +573,14 @@
 
       <div class="stage" role="region" aria-label="Invitation card preview area">
         <div class="device" id="device" data-mode="mobile">
-        <article class="invite" id="invite" data-palette="forest" data-font="cormorant" data-template="classic" aria-label="Sample wedding invitation">
+        <div class="opening" id="opening" data-opening="none" data-playing="false">
+          <button class="opening-skip" id="opening-skip" type="button" hidden>Skip</button>
+          <button class="invite-music" id="invite-music" type="button" hidden>Play music</button>
+          <div class="opening-curtain" aria-hidden="true">
+            <span class="opening-panel opening-panel-left"></span>
+            <span class="opening-panel opening-panel-right"></span>
+          </div>
+        <article class="invite" id="invite" data-palette="forest" data-type="classic" data-align="center" data-template="classic" data-event="wedding" aria-label="Wedding invitation preview">
 
           <div class="invite-section invite-welcome" data-section-el="welcome">
             <p class="invite-kicker" data-el="heading">Together with their families</p>
@@ -282,22 +603,47 @@
 
             <p class="invite-intro" data-el="message">We joyfully invite you to celebrate our wedding.</p>
             <p class="invite-note" data-el="note" hidden></p>
+          </div>
 
-            <h2 class="invite-names" data-el="names">Alex <span class="amp">&amp;</span> Jamie</h2>
+          <div class="invite-section invite-people" data-section-el="people">
+            <p class="invite-kicker" data-el="people-kicker">Couple</p>
+            <p class="invite-milestone" data-el="milestone" hidden></p>
+            <h2 class="invite-names" data-el="names">Alex <span class="amp">&</span> Jamie</h2>
+            <p class="invite-school" data-el="school" hidden></p>
+          </div>
+
+          <div class="invite-section invite-highlight" data-section-el="highlight" hidden>
+            <p class="invite-kicker" data-el="highlight-kicker">Celebration</p>
+            <p class="invite-highlight-body" data-el="celebration"></p>
           </div>
 
           <div class="invite-section invite-details" data-section-el="details">
             <hr class="invite-rule" aria-hidden="true">
             <p class="invite-date" data-el="date">12 June 2027</p>
             <p class="invite-time" data-el="time" hidden></p>
+            <p class="invite-extra" data-el="ceremony" hidden></p>
+            <p class="invite-extra" data-el="reception" hidden></p>
           </div>
 
           <div class="invite-section invite-venue" data-section-el="venue">
-            <p class="invite-venue-name" data-el="venue" hidden></p>
-            <p class="invite-place" data-el="location">Bandung, Indonesia</p>
+            <p class="invite-kicker" data-el="venue-kicker">Venue</p>
+            <div class="location-card">
+              <div class="location-map" data-el="map-preview" hidden>
+                <span class="location-pin" aria-hidden="true"></span>
+                <span class="location-map-label">Location card</span>
+              </div>
+              <p class="invite-venue-name" data-el="venue" hidden></p>
+              <p class="invite-place" data-el="location" hidden></p>
+              <p class="location-note" data-el="location-note" hidden></p>
+              <a class="location-action" data-el="map-link" hidden target="_blank" rel="noopener noreferrer">Open in Maps</a>
+            </div>
           </div>
 
-          <!-- Coming-soon sections: kept for later phases, never shown while status is "coming-soon". -->
+          <div class="invite-section invite-story" data-section-el="story">
+            <p class="invite-kicker" data-el="story-kicker">Love Story</p>
+            <p class="invite-story-body" data-el="story">We met over coffee and have been writing our story ever since.</p>
+          </div>
+
           <div class="invite-section invite-placeholder" data-section-el="countdown" hidden>
             <strong>Countdown</strong>
             <span>Coming soon.</span>
@@ -306,12 +652,15 @@
             <p class="invite-kicker">Gallery</p>
             <div class="gallery-view" data-el="gallery" data-mode="cinematic"></div>
           </div>
-          <div class="invite-section invite-cta-wrap" data-section-el="rsvp" hidden>
-            <span class="invite-cta" aria-hidden="true">Kindly reply</span>
-            <p class="invite-ph-note">RSVP is coming soon.</p>
+          <div class="invite-section invite-cta-wrap" data-section-el="rsvp">
+            <p class="invite-kicker" data-el="rsvp-kicker">RSVP</p>
+            <button class="invite-cta" type="button" id="rsvp-demo" aria-disabled="true">Kindly reply</button>
+            <p class="invite-ph-note">Demo only. Replies are not collected in this preview.</p>
           </div>
 
+          <div class="ambient" id="ambient" data-effect="none" aria-hidden="true"></div>
         </article>
+        </div>
         </div>
       </div>
 
@@ -329,13 +678,48 @@
       </div>
     </form>
   </dialog>
+  <dialog class="dialog auth-dialog" id="auth-dialog" aria-labelledby="auth-title">
+    <form id="auth-form" novalidate>
+      <h2 id="auth-title">Sign in to save</h2>
+      <p id="auth-intro">Saving to your account needs an account. Your invitation stays exactly as it is while you sign in.</p>
+      <div class="auth-tabs" role="group" aria-label="Account action">
+        <button class="auth-tab" type="button" id="auth-tab-signin" aria-pressed="true">Sign in</button>
+        <button class="auth-tab" type="button" id="auth-tab-signup" aria-pressed="false">Create account</button>
+      </div>
+      <div class="field">
+        <label class="label" for="auth-email">Email</label>
+        <input class="input" id="auth-email" name="email" type="email" autocomplete="email" inputmode="email" maxlength="254" required>
+      </div>
+      <div class="field">
+        <label class="label" for="auth-password">Password</label>
+        <input class="input" id="auth-password" name="password" type="password" autocomplete="current-password" maxlength="128" required>
+        <p class="field-hint" id="auth-password-hint" hidden>Use at least 8 characters.</p>
+      </div>
+      <p class="auth-error" id="auth-error" role="alert" hidden></p>
+      <p class="auth-info" id="auth-info" role="status" hidden></p>
+      <div class="dialog-actions">
+        <button class="btn btn-secondary btn-sm" type="button" id="auth-cancel">Continue without an account</button>
+        <button class="btn btn-primary btn-sm" type="submit" id="auth-submit">Sign in</button>
+      </div>
+    </form>
+  </dialog>
+  <dialog class="dialog" id="open-dialog" aria-labelledby="open-title">
+    <form method="dialog">
+      <h2 id="open-title">Open your saved invitation?</h2>
+      <p>This replaces what you are editing now with your most recently saved invitation. Photos and music files are not stored yet, so you will need to add them again.</p>
+      <div class="dialog-actions">
+        <button class="btn btn-secondary btn-sm" type="submit" value="cancel" autofocus>Keep what I am editing</button>
+        <button class="btn btn-primary btn-sm" type="submit" value="confirm">Open saved invitation</button>
+      </div>
+    </form>
+  </dialog>
   <dialog class="dialog" id="event-dialog" aria-labelledby="event-title">
     <form method="dialog">
-      <h2 id="event-title">Apply event preset?</h2>
-      <p id="event-dialog-copy">This replaces the suggested wording with the new event type. Date, place, photos, and appearance stay as they are.</p>
+      <h2 id="event-title">Change invitation type?</h2>
+      <p id="event-dialog-copy">Some suggested content and sections may change to better fit this event. Your existing photos and custom settings will remain.</p>
       <div class="dialog-actions">
-        <button class="btn btn-secondary btn-sm" type="submit" value="cancel" autofocus>Keep my text</button>
-        <button class="btn btn-primary btn-sm" type="submit" value="confirm">Apply preset</button>
+        <button class="btn btn-secondary btn-sm" type="submit" value="cancel" autofocus>Cancel</button>
+        <button class="btn btn-primary btn-sm" type="submit" value="confirm">Apply</button>
       </div>
     </form>
   </dialog>
@@ -352,6 +736,15 @@
   </dialog>
   <p class="visually-hidden" id="live-status" role="status" aria-live="polite"></p>
 
+  <!-- QR generation: qrcode-generator (MIT), loaded from cdnjs and used only by share.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js" defer></script>
+  <script src="share.js" defer></script>
+  <script src="packs.js" defer></script>   <!-- template pack registry: must load before script.js -->
   <script src="script.js" defer></script>
+  <script src="studio.js" defer></script>
+  <script src="download.js" defer></script>   <!-- Phase 4.3: personal preview image download; reads #invite only -->
+  <script src="guided.js" defer></script>   <!-- Phase 4.1: guided start & step flow; presentation layer only -->
+  <script src="supabase-config.js" defer></script>   <!-- Phase 4.4: public project URL + anon key only -->
+  <script src="account.js" defer></script>            <!-- Phase 4.4: optional sign-in and basic save -->
 </body>
 </html>

@@ -1,0 +1,200 @@
+/* ═══════════════════════════════════════════════════════════════
+   Celesticate Moments — Phase 3.7: Studio (advanced design layer)
+   Part A: what the invitation needs to RENDER a saved design (public-safe).
+   Part B: Studio editor UI. Every rule is scoped to body[data-studio="on"]
+           and switched off in the guest view; the nodes only exist while Studio is open.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ═════════ A. Invitation rendering ═════════ */
+.invite { --st-u: 3.8px; }   /* 1 unit = 1% of the invitation width; studio.js keeps it exact */
+
+.studio-layer { position: absolute; inset: 0; pointer-events: none; }   /* no z-index: layers interleave with sections */
+.st-el { position: absolute; box-sizing: border-box; margin: 0; pointer-events: none; }
+.st-el[data-hidden] { display: none; }
+.st-el[data-empty] { visibility: hidden; }
+.st-text { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.st-text:empty { min-height: 1em; }
+.st-image { width: 100%; height: 100%; overflow: hidden; }
+.st-image img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.st-shape { width: 100%; height: 100%; box-sizing: border-box; }
+.st-decor { width: 100%; height: 100%; }
+.st-decor svg { display: block; width: 100%; height: 100%; overflow: visible; }
+
+/* Per-section overrides */
+.invite .invite-section[data-st-xf] { transform-origin: 50% 50%; }
+body:not([data-studio="on"]) .invite .invite-section[data-st-hidden],
+body[data-view="guest"] .invite .invite-section[data-st-hidden] { display: none; }
+
+.invite[data-type] .invite-section[data-st-font] :is(p, h2, a, button, strong, span, i) { font-family: var(--st-font); }
+.invite[data-type] .invite-section[data-st-weight] :is(p, h2, a, button, strong, span, i) { font-weight: var(--st-weight); }
+.invite[data-type] .invite-section[data-st-letter] :is(p, h2, a, button, strong, span, i) { letter-spacing: var(--st-letter); }
+.invite[data-type] .invite-section[data-st-line] :is(p, h2, a, button, strong, span, i) { line-height: var(--st-line); }
+.invite[data-type] .invite-section[data-st-color] :is(p, h2, a, button, strong, span, i) { color: var(--st-color); }
+.invite[data-type] .invite-section[data-st-align="left"]   { text-align: left;   --ty-ml: 0;    --ty-mr: auto; --ty-items: start; }
+.invite[data-type] .invite-section[data-st-align="center"] { text-align: center; --ty-ml: auto; --ty-mr: auto; --ty-items: center; }
+.invite[data-type] .invite-section[data-st-align="right"]  { text-align: right;  --ty-ml: auto; --ty-mr: 0;    --ty-items: end; }
+
+/* ═════════ B. Studio editor UI ═════════ */
+.studio-bar {
+  position: relative; z-index: 100; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;
+  gap: var(--sp-2) var(--sp-4); min-height: 52px; padding: var(--sp-2) var(--sp-5);
+  color: var(--ivory); background: var(--forest); border-bottom: 1px solid var(--forest-hover);
+}
+.studio-bar-left, .studio-bar-group { display: flex; align-items: center; gap: var(--sp-2); }
+.studio-bar-brand { font: 600 20px/1 var(--font-heading); letter-spacing: .01em; }
+.studio-pill {
+  padding: 3px 10px; font-size: 11px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--forest); background: var(--gold); border-radius: var(--r-pill);
+}
+.studio-bar .btn-secondary { color: var(--ivory); background: transparent; border-color: rgba(245, 240, 232, .4); }
+.studio-bar .btn-secondary:hover:not(:disabled) { border-color: var(--gold); }
+.studio-bar .btn-primary { color: var(--forest); background: var(--ivory); }
+.studio-bar .btn-primary:hover:not(:disabled) { background: var(--white); }
+.studio-bar :focus-visible { box-shadow: 0 0 0 2px var(--forest), 0 0 0 4px var(--gold); }
+
+body[data-studio="on"]:not([data-view="guest"]) .app-header,
+body[data-studio="on"]:not([data-view="guest"]) .sidebar { display: none; }
+body[data-view="guest"] .studio-bar,
+body[data-view="guest"] .studio-panel,
+body[data-view="guest"] .studio-inspector { display: none; }
+
+body[data-studio="on"]:not([data-view="guest"]) .workspace {
+  grid-template-columns: minmax(240px, 280px) minmax(0, 1fr) minmax(250px, 300px);
+}
+body[data-studio="on"]:not([data-view="guest"]) .studio-panel { grid-column: 1; grid-row: 1; }
+body[data-studio="on"]:not([data-view="guest"]) .canvas { grid-column: 2; grid-row: 1; }
+body[data-studio="on"]:not([data-view="guest"]) .studio-inspector { grid-column: 3; grid-row: 1; }
+
+.studio-panel, .studio-inspector {
+  height: 100%; min-height: 0; min-width: 0; overflow-y: auto; overscroll-behavior: contain;
+  display: flex; flex-direction: column; gap: var(--sp-3); padding: var(--sp-4);
+  background: var(--surface); scrollbar-width: thin; scrollbar-color: var(--border) transparent;
+}
+.studio-panel > *, .studio-inspector > * { flex-shrink: 0; }
+.studio-panel { border-right: 1px solid var(--border); }
+.studio-inspector { border-left: 1px solid var(--border); }
+.studio-panel-head { padding-bottom: var(--sp-2); border-bottom: 1px solid var(--border); }
+.studio-title { font-size: 22px; letter-spacing: -.01em; }
+.studio-sub, .studio-hint, .studio-empty { margin: var(--sp-1) 0 0; font-size: 12px; line-height: 1.45; color: var(--muted); }
+.studio-empty { padding: var(--sp-4); background: var(--white); border: 1.5px dashed var(--gold-dim); border-radius: var(--r-sm); }
+.studio-card .card-body { gap: var(--sp-3); padding: var(--sp-3) var(--sp-4) var(--sp-4); }
+.studio-card .card-header { padding: var(--sp-3) var(--sp-4) var(--sp-2); }
+.studio-add-group { display: grid; gap: 6px; }
+.studio-add { display: flex; flex-wrap: wrap; gap: 6px; }
+.studio-foot { padding-top: var(--sp-2); }
+
+.studio-layers { display: grid; gap: 4px; }
+.studio-layer-row {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 6px; padding: 2px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-sm);
+}
+.studio-layer-row.is-selected { background: var(--white); border-color: var(--forest); box-shadow: 0 0 0 1px var(--forest); }
+.studio-layer-row.is-off { border-style: dashed; }
+.studio-layer-row.is-off .studio-layer-name { color: var(--muted); }
+.studio-layer-pick {
+  display: grid; gap: 1px; min-height: 40px; padding: 4px 8px; text-align: left;
+  font: inherit; color: var(--ink); background: transparent; border: 0; border-radius: var(--r-sm); cursor: pointer;
+}
+.studio-layer-name { font-size: 13px; font-weight: 500; overflow-wrap: anywhere; }
+.studio-layer-type { font-size: 11px; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+.studio-eye { min-height: 32px; padding: 0 10px; }
+
+.studio-selected { display: grid; gap: 4px; padding: var(--sp-3); background: var(--white); border: 1px solid var(--border); border-radius: var(--r-sm); }
+.studio-selected strong { font: 500 18px/1.2 var(--font-heading); overflow-wrap: anywhere; }
+.studio-selected .btn-link { justify-self: start; }
+.studio-selected-actions { display: flex; gap: 6px; margin-top: 4px; }
+.studio-group { display: grid; gap: var(--sp-2); padding: var(--sp-3); background: var(--white); border: 1px solid var(--border); border-radius: var(--r-sm); }
+.studio-group-title { font: 600 11px/1 var(--font-body); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.studio-field { display: grid; gap: 4px; min-width: 0; }
+.studio-label { font-size: 12px; font-weight: 500; color: var(--muted); }
+.studio-input { min-height: 34px; padding: 0 var(--sp-3); font-size: 13px; }
+textarea.studio-input { padding: var(--sp-2) var(--sp-3); min-height: 72px; line-height: 1.4; }
+select.studio-input { padding-right: 32px; }
+.studio-range-row { display: flex; align-items: center; gap: var(--sp-2); }
+.studio-range { flex: 1; min-width: 0; accent-color: var(--forest); }
+.studio-out { min-width: 4.5em; font-size: 12px; color: var(--ink); text-align: right; }
+.studio-reset { min-height: 28px; font-size: 12px; }
+.studio-segs { display: flex; flex-wrap: wrap; gap: 4px; }
+.studio-segs-4 { display: grid; grid-template-columns: 1fr 1fr; }
+.studio-seg[aria-pressed="true"] { color: var(--forest); background: var(--white); border-color: var(--forest); box-shadow: inset 0 0 0 1px var(--forest); }
+.studio-check { display: flex; align-items: center; gap: 8px; min-height: 32px; font-size: 13px; color: var(--ink); cursor: pointer; }
+.studio-swatches { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.studio-swatch { width: 24px; height: 24px; padding: 0; border: 1px solid var(--border); border-radius: 50%; cursor: pointer; }
+.studio-swatch[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--white), 0 0 0 3.5px var(--forest); }
+.studio-color { width: 32px; height: 26px; padding: 0; border: 1px solid var(--border); border-radius: 6px; background: transparent; cursor: pointer; }
+
+/* Selection overlay: lives in the editor stage, not inside the invitation */
+.studio-overlay { position: absolute; inset: 0; z-index: 20; pointer-events: none; }
+.studio-sel { position: absolute; border: 1.5px solid var(--forest); box-shadow: 0 0 0 1px rgba(255, 255, 255, .75); pointer-events: none; }
+.studio-sel-tag {
+  position: absolute; left: -1px; bottom: calc(100% + 4px); max-width: 220px; padding: 2px 8px; overflow: hidden;
+  font: 500 11px/1.5 var(--font-body); color: var(--white); text-overflow: ellipsis; white-space: nowrap;
+  background: var(--forest); border-radius: var(--r-pill);
+}
+.studio-handle {
+  position: absolute; width: 12px; height: 12px; margin: -6px 0 0 -6px; box-sizing: border-box;
+  background: var(--white); border: 1.5px solid var(--forest); border-radius: 3px; pointer-events: auto; touch-action: none;
+}
+.studio-handle[data-dir="nw"] { left: 0;    top: 0;    cursor: nwse-resize; }
+.studio-handle[data-dir="n"]  { left: 50%;  top: 0;    cursor: ns-resize; }
+.studio-handle[data-dir="ne"] { left: 100%; top: 0;    cursor: nesw-resize; }
+.studio-handle[data-dir="e"]  { left: 100%; top: 50%;  cursor: ew-resize; }
+.studio-handle[data-dir="se"] { left: 100%; top: 100%; cursor: nwse-resize; }
+.studio-handle[data-dir="s"]  { left: 50%;  top: 100%; cursor: ns-resize; }
+.studio-handle[data-dir="sw"] { left: 0;    top: 100%; cursor: nesw-resize; }
+.studio-handle[data-dir="w"]  { left: 0;    top: 50%;  cursor: ew-resize; }
+.studio-guide { position: absolute; width: 0; border-left: 1px dashed var(--gold); pointer-events: none; }
+
+/* Editing affordances while designing (never in the guest view) */
+body[data-studio="on"]:not([data-view="guest"]) .st-el { pointer-events: auto; touch-action: none; cursor: move; }
+body[data-studio="on"]:not([data-view="guest"]) .st-el::after { content: ""; position: absolute; inset: -6px; }
+body[data-studio="on"]:not([data-view="guest"]) .st-el:hover { outline: 1px dashed var(--forest); outline-offset: 2px; }
+body[data-studio="on"]:not([data-view="guest"]) .invite-section { cursor: move; }
+body[data-studio="on"]:not([data-view="guest"]) .invite-section:hover { outline: 1px dashed rgba(38, 61, 53, .55); outline-offset: -2px; }
+body[data-studio="on"]:not([data-view="guest"]) .st-el[data-hidden] { display: block; opacity: .2 !important; }
+body[data-studio="on"]:not([data-view="guest"]) .invite .invite-section[data-st-hidden] { opacity: .2; }
+body[data-studio="on"]:not([data-view="guest"]) .st-el[data-empty] {
+  visibility: visible; background: repeating-linear-gradient(45deg, var(--gold-soft) 0 6px, transparent 6px 12px); outline: 1px dashed var(--gold);
+}
+body.studio-dragging { cursor: grabbing; user-select: none; -webkit-user-select: none; }
+body.studio-dragging * { cursor: grabbing !important; }
+
+@media (max-width: 1060px) {
+  body[data-studio="on"]:not([data-view="guest"]) .workspace {
+    grid-template-columns: minmax(210px, 240px) minmax(0, 1fr) minmax(220px, 250px);
+  }
+}
+@media (max-width: 720px) {
+  .studio-panel, .studio-inspector { height: auto; overflow: visible; border: 0; border-top: 1px solid var(--border); }
+  body[data-studio="on"]:not([data-view="guest"]) .workspace { display: flex; flex-direction: column; }
+}
+/* ═══ Phase 3.8: Mobile Studio is its own layout, not a shrunk desktop ═══ */
+.studio-tabs { display: none; gap: 4px; }
+.studio-tab {
+  min-height: 36px; padding: 0 14px; font: 600 13px/1 var(--font-body); color: var(--ivory);
+  background: transparent; border: 1px solid rgba(245, 240, 232, .35); border-radius: var(--r-pill); cursor: pointer;
+}
+.studio-tab[aria-pressed="true"] { color: var(--forest); background: var(--ivory); border-color: var(--ivory); }
+
+body[data-studio="on"][data-studio-mode="mobile"]:not([data-view="guest"]) .studio-tabs { display: flex; }
+body[data-studio="on"][data-studio-mode="mobile"]:not([data-view="guest"]) .workspace {
+  display: flex; flex-direction: column; height: auto; min-height: 0;
+}
+body[data-studio="on"][data-studio-mode="mobile"]:not([data-view="guest"]) .canvas { order: 1; flex: 1 1 auto; min-height: 46vh; }
+body[data-studio="on"][data-studio-mode="mobile"]:not([data-view="guest"]) .studio-panel,
+body[data-studio="on"][data-studio-mode="mobile"]:not([data-view="guest"]) .studio-inspector {
+  order: 2; width: 100%; max-height: 42vh; border: 0; border-top: 1px solid var(--border);
+}
+body[data-studio="on"][data-studio-mode="mobile"] .studio-panel[data-sheet="off"],
+body[data-studio="on"][data-studio-mode="mobile"] .studio-inspector[data-sheet="off"] { display: none; }
+body[data-studio="on"][data-studio-mode="mobile"] .studio-handle {
+  width: 22px; height: 22px; margin: -11px 0 0 -11px; border-radius: 50%; border-width: 2px;
+}
+body[data-studio="on"][data-studio-mode="mobile"] .studio-bar { position: sticky; top: 0; }
+body[data-studio="on"][data-studio-mode="mobile"] .studio-add .move-btn,
+body[data-studio="on"][data-studio-mode="mobile"] .studio-eye,
+body[data-studio="on"][data-studio-mode="mobile"] .studio-seg { min-height: 40px; }
+body[data-studio="on"][data-studio-level="limited"] .studio-add-group[data-cap="shapes"],
+body[data-studio="on"][data-studio-level="limited"] .studio-add-group[data-cap="decor"],
+body[data-studio="on"][data-studio-level="basic"] .studio-add-group[data-cap="shapes"],
+body[data-studio="on"][data-studio-level="basic"] .studio-add-group[data-cap="decor"] { display: none; }
