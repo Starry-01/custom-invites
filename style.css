@@ -1957,7 +1957,29 @@ body[data-view="guest"] .stage { flex: 1 0 auto; }
 .auth-tab[aria-pressed="true"] { color: var(--white); background: var(--forest); border-color: var(--forest); }
 .auth-error { margin: 0; font-size: 13px; line-height: 1.45; color: #9B2C2C; }
 .auth-info { margin: 0; font-size: 13px; line-height: 1.45; color: var(--forest); }
-@media (max-width: 720px) {
-  .account-note { text-align: left; padding: 0 0 var(--sp-2); }
-  .header-actions { justify-content: flex-start; }
+.password-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
 }
+.password-wrap .input {
+  flex: 1;
+  padding-right: 64px;
+}
+.password-toggle {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  min-height: 28px;
+  padding: 0 10px;
+  font: 600 12px/1 var(--font-body);
+  color: var(--muted);
+  background: transparent;
+  border: 0;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+}
+.password-toggle:hover { color: var(--ink); }
+.password-toggle:focus-visible { outline: 2px solid var(--forest); outline-offset: 2px; }
+.password-toggle[aria-pressed="true"] { color: var(--forest); }

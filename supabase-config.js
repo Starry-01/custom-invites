@@ -14,8 +14,8 @@
    both values below are filled in.
    ═══════════════════════════════════════════════════════════════ */
 window.CELESTICATE_SUPABASE = {
-  url: '',          // e.g. 'https://abcdefghijklmnop.supabase.co'
-  anonKey: '',      // the public anon / publishable key from Project Settings → API
+  url: 'https://jlflyufuzrouqclbgrih.supabase.co',          // e.g. 'https://abcdefghijklmnop.supabase.co'
+  anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpsZmx5dWZ1enJvdXFjbGJncmloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA0OTAyMTQsImV4cCI6MjEwNjA2NjIxNH0.Mjy6545muvXZdRFKM1E4Tv4puyz_YiVIN4tm2AQQecc',      // the public anon / publishable key from Project Settings → API
   // The Supabase client library, loaded only when the two values above are set.
   // Pinned to an exact version. Add the sha384 hash as sdkIntegrity (see docs/SUPABASE_SETUP.md).
   sdkUrl: 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.js',

@@ -692,8 +692,18 @@
       </div>
       <div class="field">
         <label class="label" for="auth-password">Password</label>
-        <input class="input" id="auth-password" name="password" type="password" autocomplete="current-password" maxlength="128" required>
+        <div class="password-wrap">
+          <input class="input" id="auth-password" name="password" type="password" autocomplete="current-password" maxlength="128" required>
+          <button class="password-toggle" type="button" id="auth-password-toggle" aria-pressed="false" aria-label="Show password">Show</button>
+        </div>
         <p class="field-hint" id="auth-password-hint" hidden>Use at least 8 characters.</p>
+      </div>
+      <div class="field" id="auth-confirm-field" hidden>
+        <label class="label" for="auth-confirm">Confirm password</label>
+        <div class="password-wrap">
+          <input class="input" id="auth-confirm" name="confirm" type="password" autocomplete="new-password" maxlength="128">
+          <button class="password-toggle" type="button" id="auth-confirm-toggle" aria-pressed="false" aria-label="Show password">Show</button>
+        </div>
       </div>
       <p class="auth-error" id="auth-error" role="alert" hidden></p>
       <p class="auth-info" id="auth-info" role="status" hidden></p>

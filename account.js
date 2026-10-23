@@ -78,7 +78,8 @@
     if (window.supabase && typeof window.supabase.createClient === 'function') return Promise.resolve();
     return new Promise((resolve, reject) => {
       const script = document.createElement('script');
-      script.src = cfg.sdkUrl;
+      const sdkUrl = (typeof cfg.sdkUrl === 'string' && cfg.sdkUrl.trim()) || 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.js';
+      script.src = sdkUrl;
       if (cfg.sdkIntegrity) { script.integrity = cfg.sdkIntegrity; script.crossOrigin = 'anonymous'; }
       script.onload = resolve;
       script.onerror = () => reject(new Error('sdk'));
@@ -157,12 +158,28 @@
     els.submit.textContent = signup ? 'Create account' : 'Sign in';
     els.password.autocomplete = signup ? 'new-password' : 'current-password';
     els.hint.hidden = !signup;
+    if (els.confirmField) els.confirmField.hidden = !signup;
+    if (els.confirm) {
+      els.confirm.required = signup;
+      if (!signup) els.confirm.value = '';
+    }
+    // Clear passwords and reset show/hide state when switching modes
+    els.password.value = '';
+    if (els.passwordToggle) { els.password.type = 'password'; els.passwordToggle.textContent = 'Show'; els.passwordToggle.setAttribute('aria-pressed', 'false'); els.passwordToggle.setAttribute('aria-label', 'Show password'); }
+    if (els.confirm) {
+      els.confirm.value = '';
+      if (els.confirmToggle) { els.confirm.type = 'password'; els.confirmToggle.textContent = 'Show'; els.confirmToggle.setAttribute('aria-pressed', 'false'); els.confirmToggle.setAttribute('aria-label', 'Show password'); }
+    }
     clearAuthMessages();
   }
   function clearAuthMessages() {
     els.error.hidden = true; els.error.textContent = '';
     els.info.hidden = true; els.info.textContent = '';
-    els.email.removeAttribute('aria-invalid'); els.password.removeAttribute('aria-invalid');
+    [els.emailInput, els.password, els.confirm].forEach((el) => {
+      if (!el) return;
+      el.removeAttribute('aria-invalid');
+      el.removeAttribute('aria-describedby');
+    });
   }
   function openAuth(mode, title) {
     if (!els.dialog || typeof els.dialog.showModal !== 'function') return;
@@ -171,12 +188,25 @@
     if (!els.dialog.open) els.dialog.showModal();
     els.emailInput.focus();
   }
-  function closeAuth() { if (els.dialog.open) els.dialog.close(); }
+  function closeAuth() {
+    if (els.dialog.open) els.dialog.close();
+    // Clear passwords and reset toggles when dialog closes
+    els.password.value = '';
+    if (els.passwordToggle) { els.password.type = 'password'; els.passwordToggle.textContent = 'Show'; els.passwordToggle.setAttribute('aria-pressed', 'false'); }
+    if (els.confirm) {
+      els.confirm.value = '';
+      if (els.confirmToggle) { els.confirm.type = 'password'; els.confirmToggle.textContent = 'Show'; els.confirmToggle.setAttribute('aria-pressed', 'false'); }
+    }
+  }
   function authError(message, field) {
     els.info.hidden = true;
     els.error.textContent = message;
     els.error.hidden = false;
-    if (field) { field.setAttribute('aria-invalid', 'true'); field.focus(); }
+    if (field) {
+      field.setAttribute('aria-invalid', 'true');
+      field.setAttribute('aria-describedby', 'auth-error');
+      field.focus();
+    }
   }
 
   function explainAuthError(err) {
@@ -202,6 +232,11 @@
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return authError('Enter a valid email address.', els.emailInput);
     if (!password) return authError('Enter your password.', els.password);
     if (signup && password.length < 8) return authError('Use at least 8 characters for your password.', els.password);
+    if (signup) {
+      const confirm = els.confirm ? els.confirm.value : '';
+      if (!confirm) return authError('Confirm your password.', els.confirm);
+      if (password !== confirm) return authError('Passwords do not match.', els.confirm);
+    }
 
     state.authBusy = true;
     els.submit.setAttribute('aria-busy', 'true');
@@ -210,12 +245,14 @@
     try {
       const client = await ensureClient();
       if (signup) {
+        // Only email and password are sent. Confirmation is never included.
         const { data, error } = await client.auth.signUp({ email, password, options: { emailRedirectTo: window.location.origin + window.location.pathname } });
         if (error) throw error;
-        if (data && data.session) { state.user = data.session.user; render(); els.password.value = ''; continueAfterSignIn(); }
+        if (data && data.session) { state.user = data.session.user; render(); els.password.value = ''; if (els.confirm) els.confirm.value = ''; continueAfterSignIn(); }
         else {
           stashDraft();
           els.password.value = '';
+          if (els.confirm) els.confirm.value = '';
           els.info.textContent = 'Check your email to confirm your account. Your invitation is kept as it is. After you confirm, sign in here (or continue in this tab) and save.';
           els.info.hidden = false;
         }
@@ -255,11 +292,15 @@
   function explainSaveError(err, verb) {
     const code = String((err && err.code) || '');
     const text = `${code} ${(err && err.message) || ''}`.toLowerCase();
+    const status = err && err.status;
     const saving = verb !== 'open';
     if (err instanceof TypeError || /failed to fetch|networkerror|network request/.test(text)) {
       return saving
         ? 'Could not reach the account service, so the invitation may not have been saved. Press Save again; repeating it will not create a duplicate.'
         : 'Could not reach the account service. Nothing was changed.';
+    }
+    if (status === 404 || code === 'PGRST106' || /schema not exposed|api disabled|data api/.test(text)) {
+      return 'The invitations service is not reachable right now. The project\'s Data API may be disabled or not exposing the public schema.';
     }
     if (code === '23514') return 'This invitation was not saved because it is too large or has an invalid value.';
     if (code === '42P01' || code === 'PGRST205' || /relation .* does not exist|could not find the table/.test(text)) return 'Saving is not set up on the server yet (the invitations table is missing), so nothing was saved. See docs/SUPABASE_SETUP.md.';
@@ -379,13 +420,14 @@
 
   /* ── Wiring ── */
   function init() {
-    ['account-btn', 'signout-btn', 'open-saved-btn', 'save-btn', 'account-note', 'account-email', 'auth-dialog', 'auth-form', 'auth-email', 'auth-password', 'auth-password-hint', 'auth-error', 'auth-info', 'auth-submit', 'auth-tab-signin', 'auth-tab-signup', 'auth-cancel']
+    ['account-btn', 'signout-btn', 'open-saved-btn', 'save-btn', 'account-note', 'account-email', 'auth-dialog', 'auth-form', 'auth-email', 'auth-password', 'auth-password-hint', 'auth-confirm', 'auth-confirm-field', 'auth-error', 'auth-info', 'auth-submit', 'auth-tab-signin', 'auth-tab-signup', 'auth-cancel', 'auth-password-toggle', 'auth-confirm-toggle']
       .forEach((id) => { els[id] = byId(id); });
     if (!els['save-btn'] || !els['auth-dialog'] || !invitations()) return;
     Object.assign(els, {
       account: els['account-btn'], signout: els['signout-btn'], open: els['open-saved-btn'], save: els['save-btn'], note: els['account-note'],
       email: els['account-email'], dialog: els['auth-dialog'], form: els['auth-form'], emailInput: els['auth-email'], password: els['auth-password'],
-      hint: els['auth-password-hint'], error: els['auth-error'], info: els['auth-info'], submit: els['auth-submit'], tabIn: els['auth-tab-signin'], tabUp: els['auth-tab-signup'], cancel: els['auth-cancel'],
+      hint: els['auth-password-hint'], confirm: els['auth-confirm'], confirmField: els['auth-confirm-field'], error: els['auth-error'], info: els['auth-info'], submit: els['auth-submit'], tabIn: els['auth-tab-signin'], tabUp: els['auth-tab-signup'], cancel: els['auth-cancel'],
+      passwordToggle: els['auth-password-toggle'], confirmToggle: els['auth-confirm-toggle'],
     });
     render();
 
@@ -404,6 +446,40 @@
     els.cancel.addEventListener('click', () => { state.pending = null; closeAuth(); note('', 'Continuing without an account. Your invitation is unchanged.'); });
     els.dialog.addEventListener('cancel', () => { state.pending = null; });   // Escape: same as "Continue without an account"
     document.addEventListener('celesticate:reset', () => { state.recordId = null; });   // a reset invitation is a new draft
+
+    // Show / hide password toggles (password values are never stored).
+    function wireToggle(btn, input) {
+      if (!btn || !input) return;
+      btn.addEventListener('click', () => {
+        const showing = input.type === 'text';
+        input.type = showing ? 'password' : 'text';
+        btn.textContent = showing ? 'Show' : 'Hide';
+        btn.setAttribute('aria-pressed', String(!showing));
+        btn.setAttribute('aria-label', showing ? 'Show password' : 'Hide password');
+      });
+    }
+    wireToggle(els.passwordToggle, els.password);
+    wireToggle(els.confirmToggle, els.confirm);
+
+    // Clear field errors as soon as the user corrects the value.
+    [els.emailInput, els.password, els.confirm].forEach((input) => {
+      if (!input) return;
+      input.addEventListener('input', () => {
+        if (input.hasAttribute('aria-invalid')) {
+          input.removeAttribute('aria-invalid');
+          input.removeAttribute('aria-describedby');
+        }
+        // If the error was about a mismatch and the fields now match, clear the message.
+        if (els.error && !els.error.hidden && state.mode === 'signup' && (input === els.password || input === els.confirm)) {
+          const pass = els.password.value;
+          const conf = els.confirm ? els.confirm.value : '';
+          if (pass && conf && pass === conf && els.error.textContent.includes('do not match')) {
+            els.error.hidden = true;
+            els.error.textContent = '';
+          }
+        }
+      });
+    });
 
     if (configured) ensureClient().catch(() => { /* reported when the person actually tries to use an account */ });
   }
